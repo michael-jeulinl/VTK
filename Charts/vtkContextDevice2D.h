@@ -229,10 +229,10 @@ public:
   // Supply a float array of length 4 with x1, y1, width, height specifying
   // clipping region for the device in pixels.
   virtual void SetClipping(int *x) = 0;
-
+  
   // Description:
   // Disable clipping of the display.
-  virtual void DisableClipping() = 0;
+  virtual void EnableClipping(bool enable) = 0;
 
   // Description:
   // Begin drawing, pass in the viewport to set up the view.
