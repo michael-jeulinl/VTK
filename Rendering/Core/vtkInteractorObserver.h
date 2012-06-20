@@ -77,6 +77,7 @@ public:
   // window interactor are set up as a result of this method invocation.
   // The SetInteractor() method must be invoked prior to enabling the
   // vtkInteractorObserver.
+  // It automatically registers available pickers to the Picking Manager.
   virtual void SetInteractor(vtkRenderWindowInteractor* iren);
   vtkGetObjectMacro(Interactor, vtkRenderWindowInteractor);
 
@@ -91,6 +92,13 @@ public:
   // to have the priority take effect.)
   vtkSetClampMacro(Priority,float,0.0f,1.0f);
   vtkGetMacro(Priority,float);
+
+  // Description
+  // Enable/Disable the use of a manager to process the picking.
+  // Enabled by default.
+  vtkBooleanMacro(ManagesPicking, bool);
+  vtkSetMacro(ManagesPicking, bool);
+  vtkGetMacro(ManagesPicking, bool);
 
   // Description:
   // Enable/Disable of the use of a keypress to turn on and off the
@@ -193,6 +201,18 @@ protected:
 
   // Priority at which events are processed
   float Priority;
+
+  // This variable indicates whether the picking is managed by the Picking
+  // Manager process when true otherwise it stays independant to this mechanism
+  // when set to false.
+  bool ManagesPicking;
+
+  // Register internal Pickers within PickingManager
+  virtual void RegisterPickers(){}
+
+  // Update the pickers registered within the PickingManager
+  // when pickers are modfied.
+  virtual void PickersModified();
 
   // Keypress activation controls
   int KeyPressActivation;

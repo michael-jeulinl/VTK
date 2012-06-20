@@ -25,6 +25,7 @@
 #include "vtkFloatArray.h"
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
+#include "vtkPickingManager.h"
 #include "vtkPlanes.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
@@ -566,9 +567,13 @@ void vtkBoxWidget::OnLeftButtonDown()
     return;
     }
 
-  vtkAssemblyPath *path;
-  this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->HandlePicker->GetPath();
+  vtkAssemblyPath* path =
+    this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                      this->HandlePicker,
+                                      this->CurrentRenderer,
+                                      this,
+                                      this->ManagesPicking);
+
   if ( path != NULL )
     {
     this->State = vtkBoxWidget::Moving;
@@ -579,8 +584,11 @@ void vtkBoxWidget::OnLeftButtonDown()
     }
   else
     {
-    this->HexPicker->Pick(X,Y,0.0,this->CurrentRenderer);
-    path = this->HexPicker->GetPath();
+    path = this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                             this->HexPicker,
+                                             this->CurrentRenderer,
+                                             this,
+                                             this->ManagesPicking);
     if ( path != NULL )
       {
       this->State = vtkBoxWidget::Moving;
@@ -642,10 +650,12 @@ void vtkBoxWidget::OnMiddleButtonDown()
     this->State = vtkBoxWidget::Outside;
     return;
     }
-
-  vtkAssemblyPath *path;
-  this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->HandlePicker->GetPath();
+  
+  vtkAssemblyPath* path = this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                                            this->HandlePicker,
+                                                            this->CurrentRenderer,
+                                                            this,
+                                                            this->ManagesPicking);
   if ( path != NULL )
     {
     this->State = vtkBoxWidget::Moving;
@@ -656,8 +666,11 @@ void vtkBoxWidget::OnMiddleButtonDown()
     }
   else
     {
-    this->HexPicker->Pick(X,Y,0.0,this->CurrentRenderer);
-    path = this->HexPicker->GetPath();
+    path = this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                             this->HexPicker,
+                                             this->CurrentRenderer,
+                                             this,
+                                             this->ManagesPicking);
     if ( path != NULL )
       {
       this->State = vtkBoxWidget::Moving;
@@ -711,10 +724,13 @@ void vtkBoxWidget::OnRightButtonDown()
     this->State = vtkBoxWidget::Outside;
     return;
     }
-
-  vtkAssemblyPath *path;
-  this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->HandlePicker->GetPath();
+  
+  vtkAssemblyPath* path =
+    this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                      this->HandlePicker,
+                                      this->CurrentRenderer,
+                                      this,
+                                      this->ManagesPicking);
   if ( path != NULL )
     {
     this->State = vtkBoxWidget::Scaling;
@@ -724,8 +740,11 @@ void vtkBoxWidget::OnRightButtonDown()
     }
   else
     {
-    this->HexPicker->Pick(X,Y,0.0,this->CurrentRenderer);
-    path = this->HexPicker->GetPath();
+    path = this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                             this->HexPicker,
+                                             this->CurrentRenderer,
+                                             this,
+                                             this->ManagesPicking);
     if ( path != NULL )
       {
       this->State = vtkBoxWidget::Scaling;
@@ -1443,4 +1462,11 @@ void vtkBoxWidget::GenerateOutline()
     this->OutlineProperty->SetRepresentationToWireframe();
     this->SelectedOutlineProperty->SetRepresentationToWireframe();
     }
+}
+
+//------------------------------------------------------------------------------
+void vtkBoxWidget::RegisterPickers()
+{
+  this->Interactor->GetPickingManager()->AddPicker(this->HandlePicker, this);
+  this->Interactor->GetPickingManager()->AddPicker(this->HexPicker, this);
 }

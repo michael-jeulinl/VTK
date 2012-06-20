@@ -20,6 +20,7 @@
 #include "vtkCamera.h"
 #include "vtkCellPicker.h"
 #include "vtkMath.h"
+#include "vtkPickingManager.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkProperty.h"
@@ -166,6 +167,12 @@ void vtkPointWidget::SetEnabled(int enabling)
   this->Interactor->Render();
 }
 
+//------------------------------------------------------------------------------
+void vtkPointWidget::RegisterPickers()
+{
+  this->Interactor->GetPickingManager()->AddPicker(this->CursorPicker, this);
+}
+
 void vtkPointWidget::ProcessEvents(vtkObject* vtkNotUsed(object),
                                    unsigned long event,
                                    void* clientdata,
@@ -309,9 +316,13 @@ void vtkPointWidget::OnLeftButtonDown()
     return;
     }
 
-  vtkAssemblyPath *path;
-  this->CursorPicker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->CursorPicker->GetPath();
+  vtkAssemblyPath* path =
+    this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                      this->CursorPicker,
+                                      this->CurrentRenderer,
+                                      this,
+                                      this->ManagesPicking);
+
   if ( path != NULL )
     {
     this->State = vtkPointWidget::Moving;
@@ -362,9 +373,13 @@ void vtkPointWidget::OnMiddleButtonDown()
     }
 
   // Okay, we can process this.
-  vtkAssemblyPath *path;
-  this->CursorPicker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->CursorPicker->GetPath();
+  vtkAssemblyPath* path =
+    this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                      this->CursorPicker,
+                                      this->CurrentRenderer,
+                                      this,
+                                      this->ManagesPicking);
+
   if ( path != NULL )
     {
     this->State = vtkPointWidget::Translating;
@@ -414,9 +429,13 @@ void vtkPointWidget::OnRightButtonDown()
     }
 
   // Okay, we can process this. Pick the cursor.
-  vtkAssemblyPath *path;
-  this->CursorPicker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->CursorPicker->GetPath();
+  vtkAssemblyPath* path =
+    this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                      this->CursorPicker,
+                                      this->CurrentRenderer,
+                                      this,
+                                      this->ManagesPicking);
+
   if ( path != NULL )
     {
     this->State = vtkPointWidget::Scaling;

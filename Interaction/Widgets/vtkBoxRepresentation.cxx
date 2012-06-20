@@ -20,8 +20,10 @@
 #include "vtkPolyData.h"
 #include "vtkCallbackCommand.h"
 #include "vtkBox.h"
+#include "vtkPickingManager.h"
 #include "vtkPolyData.h"
 #include "vtkProperty.h"
+#include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
 #include "vtkInteractorObserver.h"
@@ -946,12 +948,14 @@ int vtkBoxRepresentation::ComputeInteractionState(int X, int Y, int modify)
     return this->InteractionState;
     }
 
-  vtkAssemblyPath *path;
   // Try and pick a handle first
   this->LastPicker = NULL;
   this->CurrentHandle = NULL;
-  this->HandlePicker->Pick(X,Y,0.0,this->Renderer);
-  path = this->HandlePicker->GetPath();
+
+  vtkAssemblyPath* path =
+    this->Renderer->GetRenderWindow()->GetInteractor()->GetAssemblyPath(
+      X, Y, 0., this->HandlePicker, this->Renderer, this, this->ManagesPicking);
+
   if ( path != NULL )
     {
     this->ValidPick = 1;
@@ -989,8 +993,10 @@ int vtkBoxRepresentation::ComputeInteractionState(int X, int Y, int modify)
     }
   else //see if the hex is picked
     {
-    this->HexPicker->Pick(X,Y,0.0,this->Renderer);
-    path = this->HexPicker->GetPath();
+    path =
+      this->Renderer->GetRenderWindow()->GetInteractor()->GetAssemblyPath(
+        X, Y, 0., this->HexPicker, this->Renderer, this, this->ManagesPicking);
+
     if ( path != NULL )
       {
       this->LastPicker = this->HexPicker;
@@ -1308,6 +1314,15 @@ void vtkBoxRepresentation::HighlightOutline(int highlight)
     this->HexActor->SetProperty(this->OutlineProperty);
     this->HexOutline->SetProperty(this->OutlineProperty);
     }
+}
+
+//------------------------------------------------------------------------------
+void vtkBoxRepresentation::RegisterPickers()
+{
+  this->Renderer->GetRenderWindow()->GetInteractor()->GetPickingManager()
+    ->AddPicker(this->HandlePicker, this);
+  this->Renderer->GetRenderWindow()->GetInteractor()->GetPickingManager()
+    ->AddPicker(this->HexPicker, this);
 }
 
 //----------------------------------------------------------------------------

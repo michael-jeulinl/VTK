@@ -55,6 +55,13 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
+  // Enable/Disable the use of a manager to process the picking.
+  // Enabled by default.
+  vtkBooleanMacro(ManagesPicking, bool);
+  vtkSetMacro(ManagesPicking, bool);
+  vtkGetMacro(ManagesPicking, bool);
+
+  // Description:
   // Subclasses of vtkWidgetRepresentation must implement these methods. This is
   // considered the minimum API for a widget representation.
   // <pre>
@@ -181,6 +188,23 @@ protected:
   // sizing has to follow a different path. The following ivars help with
   // this process.
   int    ValidPick; //indicate when valid picks are made
+
+  // This variable indicates whether the picking is managed by the Picking
+  // Manager when true or if it stays independant to this mechanism
+  // when set to false.
+  bool ManagesPicking;
+
+  // Register internal Pickers within the PickingManager
+  // Must be reimplemented by concrete widget
+  // representations to "register" their pickers.
+  virtual void RegisterPickers(){}
+
+  // UnRegister internal Pickers within the PickingManager
+  virtual void UnRegisterPickers();
+
+  // Update the pickers registered within the PickingManager
+  // when pickers are modfied.
+  virtual void PickersModified();
 
   // Members use to control handle size. The two methods return a "radius"
   // in world coordinates. Note that the HandleSize data member is used

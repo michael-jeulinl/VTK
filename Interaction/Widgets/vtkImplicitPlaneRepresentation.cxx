@@ -29,10 +29,12 @@
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
 #include "vtkOutlineFilter.h"
+#include "vtkPickingManager.h"
 #include "vtkPlane.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkProperty.h"
+#include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
@@ -284,9 +286,9 @@ int vtkImplicitPlaneRepresentation::ComputeInteractionState(int X, int Y,
                                                             int vtkNotUsed(modify))
 {
   // See if anything has been selected
-  vtkAssemblyPath *path;
-  this->Picker->Pick(X,Y,0.0,this->Renderer);
-  path = this->Picker->GetPath();
+  vtkAssemblyPath* path =
+    this->Renderer->GetRenderWindow()->GetInteractor()->GetAssemblyPath(
+      X, Y, 0., this->Picker, this->Renderer, this, this->ManagesPicking);
 
   if ( path == NULL ) // Not picking this widget
     {
@@ -1310,4 +1312,11 @@ void vtkImplicitPlaneRepresentation::SetNormalToCamera()
   double normal[3];
   this->Renderer->GetActiveCamera()->GetViewPlaneNormal(normal);
   this->SetNormal(normal);
+}
+
+//----------------------------------------------------------------------
+void vtkImplicitPlaneRepresentation::RegisterPickers()
+{
+  this->Renderer->GetRenderWindow()->GetInteractor()->GetPickingManager()
+    ->AddPicker(this->Picker, this);
 }

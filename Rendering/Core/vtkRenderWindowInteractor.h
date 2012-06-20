@@ -53,11 +53,13 @@ class vtkTimerIdMap;
 
 class vtkAbstractPicker;
 class vtkAbstractPropPicker;
+class vtkAssemblyPath;
 class vtkInteractorObserver;
 class vtkRenderWindow;
 class vtkRenderer;
 class vtkObserverMediator;
 class vtkInteractorEventRecorder;
+class vtkPickingManager;
 
 class VTKRENDERINGCORE_EXPORT vtkRenderWindowInteractor : public vtkObject
 {
@@ -255,6 +257,20 @@ public:
   // Create default picker. Used to create one when none is specified.
   // Default is an instance of vtkPropPicker.
   virtual vtkAbstractPropPicker *CreateDefaultPicker();
+
+  // Description:
+  // Set the picking manager.
+  // Set/Get the object used to perform operations through the interactor
+  virtual void SetPickingManager(vtkPickingManager*);
+  vtkGetObjectMacro(PickingManager,vtkPickingManager);
+
+  // Proceed to a picking, whether through the PickingManager if managed or
+  // directly using the picker, and return the assembly path.
+  vtkAssemblyPath* GetAssemblyPath(double X, double Y, double Z,
+                                   vtkAbstractPropPicker* picker,
+                                   vtkRenderer* renderer,
+                                   vtkObject* obj,
+                                   bool isManaged);
 
   // Description:
   // These methods correspond to the the Exit, User and Pick
@@ -506,6 +522,12 @@ protected:
 
   // Used as a helper object to pick instances of vtkProp
   vtkAbstractPicker     *Picker;
+  vtkPickingManager     *PickingManager;
+
+  // Description:
+  // Create default pickingManager. Used to create one when none is specified.
+  // Default is an instance of vtkPickingManager.
+  virtual vtkPickingManager *CreateDefaultPickingManager();
 
   int    Initialized;
   int    Enabled;

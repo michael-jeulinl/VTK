@@ -16,11 +16,13 @@
 #include "vtkActor.h"
 #include "vtkFollower.h"
 #include "vtkTexture.h"
+#include "vtkPickingManager.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkPolyData.h"
 #include "vtkProperty.h"
 #include "vtkCellPicker.h"
 #include "vtkRenderer.h"
+#include "vtkRenderWindowInteractor.h"
 #include "vtkProperty.h"
 #include "vtkAssemblyPath.h"
 #include "vtkInteractorObserver.h"
@@ -167,6 +169,13 @@ GetButtonTexture(int i)
     }
 }
 
+//----------------------------------------------------------------------
+void vtkTexturedButtonRepresentation::RegisterPickers()
+{
+  this->Renderer->GetRenderWindow()->GetInteractor()->GetPickingManager()
+    ->AddPicker(this->Picker, this);
+}
+
 //-------------------------------------------------------------------------
 void vtkTexturedButtonRepresentation::
 PlaceWidget(double scale, double xyz[3], double normal[3])
@@ -255,8 +264,10 @@ int vtkTexturedButtonRepresentation
 ::ComputeInteractionState(int X, int Y, int vtkNotUsed(modify))
 {
   this->VisibilityOn(); //actor must be on to be picked
-  this->Picker->Pick(X,Y,0.0,this->Renderer);
-  vtkAssemblyPath *path = this->Picker->GetPath();
+
+  vtkAssemblyPath* path =
+    this->Renderer->GetRenderWindow()->GetInteractor()->GetAssemblyPath(
+      X, Y, 0., this->Picker, this->Renderer, this, this->ManagesPicking);
 
   if ( path != NULL )
     {

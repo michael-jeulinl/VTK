@@ -23,6 +23,7 @@
 #include "vtkDoubleArray.h"
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
+#include "vtkPickingManager.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkProperty.h"
@@ -394,9 +395,13 @@ void vtkSphereWidget::OnLeftButtonDown()
 
   // Okay, we can process this. Try to pick handles first;
   // if no handles picked, then try to pick the sphere.
-  vtkAssemblyPath *path;
-  this->Picker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->Picker->GetPath();
+  vtkAssemblyPath* path =
+    this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                      this->Picker,
+                                      this->CurrentRenderer,
+                                      this,
+                                      this->ManagesPicking);
+
   if ( path == NULL )
     {
     this->State = vtkSphereWidget::Outside;
@@ -520,9 +525,13 @@ void vtkSphereWidget::OnRightButtonDown()
 
   // Okay, we can process this. Try to pick handles first;
   // if no handles picked, then pick the bounding box.
-  vtkAssemblyPath *path;
-  this->Picker->Pick(X,Y,0.0,this->CurrentRenderer);
-  path = this->Picker->GetPath();
+  vtkAssemblyPath* path =
+    this->Interactor->GetAssemblyPath(X, Y, 0.,
+                                      this->Picker,
+                                      this->CurrentRenderer,
+                                      this,
+                                      this->ManagesPicking);
+
   if ( path == NULL )
     {
     this->State = vtkSphereWidget::Outside;
@@ -728,6 +737,11 @@ void vtkSphereWidget::SizeHandles()
   this->HandleSource->SetRadius(radius);
 }
 
+//------------------------------------------------------------------------------
+void vtkSphereWidget::RegisterPickers()
+{
+  this->Interactor->GetPickingManager()->AddPicker(this->Picker, this);
+}
 
 void vtkSphereWidget::GetPolyData(vtkPolyData *pd)
 {

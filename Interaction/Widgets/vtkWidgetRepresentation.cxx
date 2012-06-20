@@ -12,13 +12,13 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
+#include "vtkAbstractPropPicker.h"
 #include "vtkWidgetRepresentation.h"
 #include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
 #include "vtkInteractorObserver.h"
-
-
-
+#include "vtkPickingManager.h"
 
 //----------------------------------------------------------------------
 vtkWidgetRepresentation::vtkWidgetRepresentation()
@@ -42,21 +42,58 @@ vtkWidgetRepresentation::vtkWidgetRepresentation()
   this->InitialLength = 0.0;
 
   this->NeedToRender = 0;
+
+  this->ManagesPicking = true;
 }
 
 //----------------------------------------------------------------------
 vtkWidgetRepresentation::~vtkWidgetRepresentation()
 {
+  this->UnRegisterPickers();
 }
 
 //----------------------------------------------------------------------
 void vtkWidgetRepresentation::SetRenderer(vtkRenderer *ren)
 {
-  if ( ren != this->Renderer )
+  if ( ren == this->Renderer )
     {
-    this->Renderer = ren;
-    this->Modified();
+    return;
     }
+
+  this->UnRegisterPickers();
+  this->Renderer = ren;
+  this->PickersModified();
+  this->Modified();
+}
+
+//----------------------------------------------------------------------------
+void vtkWidgetRepresentation::UnRegisterPickers()
+{
+  if (!this->Renderer ||
+      !this->Renderer->GetRenderWindow() ||
+      !this->Renderer->GetRenderWindow()->GetInteractor() ||
+      !this->Renderer->GetRenderWindow()->GetInteractor()->GetPickingManager())
+    {
+    return;
+    }
+
+  this->Renderer->GetRenderWindow()->GetInteractor()
+    ->GetPickingManager()->RemoveObject(this);
+}
+
+//----------------------------------------------------------------------------
+void vtkWidgetRepresentation::PickersModified()
+{
+  if (!this->Renderer ||
+      !this->Renderer->GetRenderWindow() ||
+      !this->Renderer->GetRenderWindow()->GetInteractor() ||
+      !this->Renderer->GetRenderWindow()->GetInteractor()->GetPickingManager())
+    {
+    return;
+    }
+
+  this->UnRegisterPickers();
+  this->RegisterPickers();
 }
 
 //----------------------------------------------------------------------
