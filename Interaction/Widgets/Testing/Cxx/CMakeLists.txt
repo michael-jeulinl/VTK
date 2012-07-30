@@ -39,6 +39,8 @@ set(MyTests
   TestOrientationMarkerWidget.cxx
   # TestOrthoPlanes.cxx # todo (unsatistfied deps)
   TestParallelopipedWidget.cxx
+  TestPickingManagerWidgets.cxx # Test for the picking manager using different widgets
+  TestPickingManagerSeedWidget.cxx # Test picking manager in a scene full of seeds (Perf + Interaction)
   TestPlaneWidget.cxx
   TestPlaybackWidget.cxx
   TestPointHandleRepresentation3D.cxx
